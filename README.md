@@ -111,14 +111,14 @@ YOLO提出时由于one-stage特性，速度很快，FPS可以达到45，总体�
 
 ![](./assets/darknet19.png)
 
-YOLO2的训练分为三个阶段。首先，是224输入的Imagenet的Darknet19预训练（160轮）；接着，是调整输入为448的Imagenet上的Finetune训练（10轮）；最后，移除Darknet最后的卷积层、全局池化层以及Softmax分类层，新增三个卷积核为（3,3,1024）的卷积层和一个passthrough层，最后使用(1,1)的卷积层输出检测结果。输出为对应网格数的向量，向量维度为$anchors_num*(5+classes_num)$，由于anchors为5，对20中对象的VOC数据集输出为(13,13,125)，可以将125为向量理解为5个bbox的预测结果，25个值分别表示bbox的位置和大小以及置信度(tx,ty,tw,th)、Confidence，以及20个值表示的类别结果。
+YOLO2的训练分为三个阶段。首先，是224输入的Imagenet的Darknet19预训练（160轮）；接着，是调整输入为448的Imagenet上的Finetune训练（10轮）；最后，移除Darknet最后的卷积层、全局池化层以及Softmax分类层，新增三个卷积核为（3,3,1024）的卷积层和一个passthrough层，最后使用(1,1)的卷积层输出检测结果。输出为对应网格数的向量，向量维度为$anchors\_num*(5+classes\_num)$，由于anchors为5，对20中对象的VOC数据集输出为(13,13,125)，可以将125为向量理解为5个bbox的预测结果，25个值分别表示bbox的位置和大小以及置信度(tx,ty,tw,th)、Confidence，以及20个值表示的类别结果。
 
 对应的损失函数也调整如下。
 
 $$\begin{array}{rl}
 \operatorname{loss}_{t}=\sum_{i=0}^{W} \sum_{j=0}^{H} \sum_{k=0}^{A} & 1_{\text {Max}  IOU<\text {Thresh}} \lambda_{\text {noobj}} \cdot\left(-b_{i j k}^{o}\right)^{2} \\
 & +1_{t<12800} \lambda_{\text {prior}} * \sum_{r \epsilon(x, y, w, h)}\left(\text {prior}_{k}^{r}-b_{i j k}^{r}\right)^{2} \\
-+ & 1_{k}^{\text {truth}}\left(\lambda_{\text {coord}} \cdot \sum_{r e(x, y, w, h)}\left(\text {truth}^{r}-b_{i j k}^{r}\right)^{2}\right. \\
+& +1_{k}^{\text {truth}}\left(\lambda_{\text {coord}} \cdot \sum_{r e(x, y, w, h)}\left(\text {truth}^{r}-b_{i j k}^{r}\right)^{2}\right. \\
 & +\lambda_{\text {obj}} *\left(IOU_{\text {truth}}^{k}-b_{i j k}^{o}\right)^{2} \\
 & \left.+\lambda_{\text {class}} *\left(\sum_{c=1}^{c}\left(\text {truth}^{c}-b_{i j k}^{c}\right)^{2}\right)\right)
 \end{array}$$
